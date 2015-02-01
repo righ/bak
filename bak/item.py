@@ -18,7 +18,7 @@ def gen_suffix():
 
 class Item(object):
     def __repr__(self):
-        return '<{0}: {1}>'.format(self.basename, len(self.history)
+        return '<{0} - {1}>'.format(self.basename, len(self.history))
 
     def __init__(
         self, path,
@@ -56,7 +56,7 @@ class Item(object):
         return sorted([
             item for item in os.listdir(self.savepath)
             if item.startswith(self.basename + '.')
-        ])
+        ], reverse=True)
 
     def temporary(self):
         tmppath = os.path.join(self.savepath, self.basename + gen_suffix())
@@ -65,29 +65,28 @@ class Item(object):
             os.makedirs(self.savepath)
 
         self.archiver.compress(self.path, tmppath, isdir=self.isdir)
+        history = self.history
+
         try:
             nochange = filecmp.cmp(
-                tmppath,
-                os.path.join(self.savepath, self.history[1])
+                os.path.join(self.savepath, history[0]),
+                os.path.join(self.savepath, history[1])
             )
         except IndexError:
             nochange = False
 
-        return tmppath, nochange
+        return nochange
 
-    def save(self, nochange=False):
-        tmppath, _nochange = self.temporary()
-        if not nochange and _nochange:
-            os.remove(tmppath)
+    def save(self, force=False):
+        nochange = self.temporary()
+        if not force and nochange:
+            os.remove(os.path.join(self.savepath, self.history[0]))
 
-    def restore(self, nochange=False, keep=False):
+    def restore(self, force=False, keep=False):
+        nochange = self.temporary()
         history = self.history
-        if not history:
-            # TODO: add message
-            raise Exception()
 
-        tmppath, _nochange = self.temporary()
-        if nochange or not _nochange:
+        if (force or not nochange) and len(history) > 1:
             self.remove(self.path)
             archive = os.path.join(self.savepath, history[1])
             self.archiver.decompress(archive, self.path, isdir=self.isdir)
@@ -97,4 +96,4 @@ class Item(object):
             keep = False
 
         if not keep:
-            os.remove(tmppath)
+            os.remove(os.path.join(self.savepath, history[0]))

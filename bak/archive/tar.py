@@ -5,10 +5,7 @@ import tarfile
 from .base import BaseArchiver
 
 MAPPING = {
-    'gz': ('gz', 'tgz'),
-    'gzip': ('gz', 'tgz'),
     'bz2': ('bz2', 'tbz', ),
-    'xz': ('xz', 'txz', ),
     'tar': ('', 'tar')
 }
 
@@ -19,7 +16,7 @@ class TarArchiver(BaseArchiver):
     def compress(self, src, dst, isdir=True):
         """tar file compressor
         """
-        method = self.options.get('method', 'gz')
+        method = self.options.get('method', 'bz2')
         try:
             mode, extension_default = MAPPING[method]
         except KeyError:
@@ -42,6 +39,7 @@ class TarArchiver(BaseArchiver):
 
         with tarfile.open(dst, 'w:' + mode) as tar:
             tar.add(src.rstrip('/'), filter=exclude_filter)
+        return dst
 
     def decompress(self, src, dst, isdir=True):
         """tar file decompressor
@@ -49,4 +47,3 @@ class TarArchiver(BaseArchiver):
         realpath = os.path.realpath(dst)
         with tarfile.open(src) as tar:
             tar.extractall(os.path.dirname(realpath), members=tar.getmembers())
-

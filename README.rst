@@ -9,6 +9,9 @@ Install
 
  $ pip install bak
 
+Note
+====
+This library has not been tested enought yet.
 
 Usage
 =====
@@ -29,6 +32,9 @@ Basic Example
 
 History
 =======
+0.1.x
+-----
+- There is no change in the file(or directory), it does not save and restore.
 
 0.0.x
 -----

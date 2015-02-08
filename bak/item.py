@@ -7,64 +7,60 @@ import filecmp
 import uuid
 
 from datetime import datetime
-from .archive.tar import TarArchiver
+from .archive.tar import TBZArchiver
+from .exception import (
+    ItemNotFound,
+    ItemPathInvalid,
+    HistoryEmpty,
+)
 
 DATETIME_FORMAT = '%Y%m%d%H%M%S%f'
 
 
-def gen_suffix():
-    return '.' + datetime.now().strftime(DATETIME_FORMAT)
-
-
 class Item(object):
     def __repr__(self):
-        return '<{0} - {1}>'.format(self.basename, len(self.history))
+        return '<{0} ({1})>'.format(self.basename, len(self.history))
 
-    def __init__(
-        self, path,
-        savepath=None, wrap=None, archiver=TarArchiver,
-        **options
-    ):
+    def __init__(self, path, savepath=None, archiver=TBZArchiver, **options):
         self.path = path.rstrip('/')
-        self.savepath = savepath or os.path.dirname(path) or './'
-        if wrap:
-            self.savepath = os.path.join(self.savepath, wrap)
+        self.basename = os.path.basename(self.path)
+        self.startswith = re.compile('^' + re.escape(self.basename) + '\.([0-9]{14,20})')
 
-        self.basename = os.path.basename(path)
-
-        if not os.path.exists(path):
-            raise Exception()
+        abspath = os.path.realpath(path)
+        if not os.path.exists(abspath):
+            raise ItemNotFound(abspath)
 
         self.options = options
         self.archiver = archiver(**options)
 
-        self.isdir = os.path.isdir(path)
+        self.isdir = os.path.isdir(abspath)
         if self.isdir:
             self.remove = shutil.rmtree
         else:
             self.remove = os.remove
 
-        for self.basename in reversed(path.split('/')):
+        for self.basename in reversed(abspath.split('/')):
             if self.basename:
                 break
         else:
-            # TODO: add message
-            raise Exception()
+            raise ItemPathInvalid(abspath)
+
+        # if no problem, make save dir
+        self.savepath = savepath or os.path.dirname(self.path) or './'
+        if not os.path.exists(self.savepath):
+            os.makedirs(self.savepath)
 
     @property
     def history(self):
         return sorted([
             item for item in os.listdir(self.savepath)
-            if item.startswith(self.basename + '.')
+            if self.startswith.search(item)
         ], reverse=True)
 
     def temporary(self):
-        tmppath = os.path.join(self.savepath, self.basename + gen_suffix())
-
-        if not os.path.exists(self.savepath):
-            os.makedirs(self.savepath)
-
-        self.archiver.compress(self.path, tmppath, isdir=self.isdir)
+        suffix = '.' + datetime.now().strftime(DATETIME_FORMAT)
+        tmppath = os.path.join(self.savepath, self.basename + suffix)
+        tmppath = self.archiver.compress(self.path, tmppath, isdir=self.isdir)
         history = self.history
 
         try:
@@ -75,25 +71,31 @@ class Item(object):
         except IndexError:
             nochange = False
 
-        return nochange
+        return nochange, tmppath
 
     def save(self, force=False):
-        nochange = self.temporary()
+        nochange, newpath = self.temporary()
         if not force and nochange:
-            os.remove(os.path.join(self.savepath, self.history[0]))
+            os.remove(newpath)
 
-    def restore(self, force=False, keep=False):
-        nochange = self.temporary()
+    def restore(self, force=False, refuge_current=True):
         history = self.history
+        if not history:
+            raise HistoryEmpty(os.listdir(self.savepath))
 
-        if (force or not nochange) and len(history) > 1:
+        nochange, curpath = self.temporary()
+        latestpath = history[0]
+
+        if force or not nochange:
             self.remove(self.path)
-            archive = os.path.join(self.savepath, history[1])
+            archive = os.path.join(self.savepath, latestpath)
             self.archiver.decompress(archive, self.path, isdir=self.isdir)
             os.remove(archive)
 
+        if refuge_current:
+            sentence = curpath.rsplit('.', 2)
+            sentence[1] = 'current'
+            refugepath = '.'.join(sentence)
+            shutil.move(curpath, refugepath)
         else:
-            keep = False
-
-        if not keep:
-            os.remove(os.path.join(self.savepath, history[0]))
+            os.remove(curpath)

@@ -3,3 +3,5 @@ syntax: glob
 *.swp
 bak.egg-info/*
 dist/*
+syntax: regexp
+\.coverage

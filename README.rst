@@ -35,6 +35,8 @@ History
 0.1.x
 -----
 - There is no change in the file(or directory), it does not save and restore.
+- Added Exceptions.
+- Added Tests.
 
 0.0.x
 -----

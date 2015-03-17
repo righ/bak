@@ -4,7 +4,6 @@ import os
 import re
 import shutil
 import filecmp
-import uuid
 
 from datetime import datetime
 from .archive.tar import TBZArchiver
@@ -12,19 +11,40 @@ from .exception import (
     ItemNotFound,
     ItemPathInvalid,
     HistoryEmpty,
+    InvalidDatetimeUnit,
 )
 
-DATETIME_FORMAT = '%Y%m%d%H%M%S%f'
+BASE_DATETIME_FORMAT = '%Y%m%d%H%M%S%f'
 
 
 class Item(object):
     def __repr__(self):
         return '<{0} ({1})>'.format(self.basename, len(self.history))
 
-    def __init__(self, path, savepath=None, archiver=TBZArchiver, **options):
+    def __init__(
+        self,
+        path,
+        savepath=None,
+        archiver=TBZArchiver,
+        datetime_unit='microsecond',
+        **options
+    ):
         self.path = path.rstrip('/')
         self.basename = os.path.basename(self.path)
-        self.startswith = re.compile('^' + re.escape(self.basename) + '\.([0-9]{14,20})')
+
+        try:
+            index = {
+                'year': 2, 'month': 4, 'day': 6,
+                'hour': 8, 'minute': 10, 'second': 12, 'microsecond': 14,
+            }[datetime_unit.lower()]
+            self.datetime_format = BASE_DATETIME_FORMAT[:index]
+        except KeyError:
+            raise InvalidDatetimeUnit
+
+        self.startswith = re.compile('^{basename}\.{suffix}'.format(
+            basename=re.escape(self.basename),
+            suffix=r'(\d{4,21})'
+        ))
 
         abspath = os.path.realpath(path)
         if not os.path.exists(abspath):
@@ -58,7 +78,7 @@ class Item(object):
         ], reverse=True)
 
     def temporary(self):
-        suffix = '.' + datetime.now().strftime(DATETIME_FORMAT)
+        suffix = '.' + datetime.now().strftime(self.datetime_format)
         tmppath = os.path.join(self.savepath, self.basename + suffix)
         tmppath = self.archiver.compress(self.path, tmppath, isdir=self.isdir)
         history = self.history

@@ -1,5 +1,6 @@
 # coding: utf-8
 
+
 class BakException(Exception):
     pass
 
@@ -13,4 +14,8 @@ class ItemPathInvalid(BakException):
 
 
 class HistoryEmpty(BakException):
+    pass
+
+
+class InvalidDatetimeUnit(BakException):
     pass

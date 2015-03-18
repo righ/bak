@@ -26,7 +26,7 @@ class Item(object):
         path,
         savepath=None,
         archiver=TBZArchiver,
-        datetime_unit='microsecond',
+        datetime_unit='second',
         **options
     ):
         self.path = path.rstrip('/')

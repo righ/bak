@@ -7,7 +7,6 @@ except ImportError:
 
 from .base import BaseCondition
 from ..exception import BakException
-from ..item import DATETIME_FORMAT
 
 
 class InvalidDeltaType(BakException):

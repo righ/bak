@@ -18,8 +18,7 @@ class RemoveBehavior(BaseBehavior):
         else:
             self.slice = slice(*args)
 
-    def do(self, item):
+    def execute(self, item, **env):
         for archivename in item.history[self.slice]:
-            archivepath = os.path.join(item.savepath, backup_file)
+            archivepath = os.path.join(item.savepath, archivename)
             os.remove(archivepath)
-

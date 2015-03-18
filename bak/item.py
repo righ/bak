@@ -7,6 +7,7 @@ import filecmp
 
 from datetime import datetime
 from .archive.tar import TBZArchiver
+from .handler import Handler
 from .exception import (
     ItemNotFound,
     ItemPathInvalid,
@@ -70,6 +71,8 @@ class Item(object):
         if not os.path.exists(self.savepath):
             os.makedirs(self.savepath)
 
+        self.handlers = []
+
     @property
     def history(self):
         return sorted([
@@ -97,6 +100,7 @@ class Item(object):
         nochange, newpath = self.temporary()
         if not force and nochange:
             os.remove(newpath)
+        self.trigger(**self.options)
 
     def restore(self, force=False, refuge_current=True):
         history = self.history
@@ -119,3 +123,11 @@ class Item(object):
             shutil.move(curpath, refugepath)
         else:
             os.remove(curpath)
+
+    def on(self, behavior, *conditions):
+        self.handlers.append(Handler(behavior, conditions))
+        return self
+
+    def trigger(self, **env):
+        for handler in self.handlers:
+            handler.trigger(self, **env)

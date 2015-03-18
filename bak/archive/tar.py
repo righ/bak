@@ -38,10 +38,11 @@ class TBZArchiver(TarArchiver):
     extension = 'tbz'
     mode = 'bz2'
 
-'''
+
 class TGZArchiver(TarArchiver):
     """tar archiver that compressed by gzip
+    [Deprecated]gzip(tgz) binary contains timestamp automatically,
+    and even the same content, each different binary from being generated.
     """
     extension = 'tgz'
     mode = 'gz'
-'''

@@ -12,8 +12,8 @@ class Handler(object):
         self.signal = signal
 
     def trigger(self, item, **env):
-        for condition in self.condition:
-            if not condition.evalute(item, **env):
+        for signal in self.signal:
+            if not signal.evalute(item, **env):
                 break
         else:
             for behavior in self.behavior:

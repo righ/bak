@@ -1,9 +1,9 @@
 # coding: utf-8
 from datetime import datetime
-from .base import BaseCondition
+from .base import BaseSignal
 
 
-class ScheduleCondition(BaseCondition):
+class ScheduleSignal(BaseSignal):
     def __init__(self, minute='*', hour='*', day='*', month='*', week='*'):
         self.timerule = {
             'minute': str(minute),

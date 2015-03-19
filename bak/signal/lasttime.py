@@ -5,7 +5,7 @@ try:
 except ImportError:
     from datetime import timedelta
 
-from .base import BaseCondition
+from .base import BaseSignal
 from ..exception import BakException
 
 
@@ -13,7 +13,7 @@ class InvalidDeltaType(BakException):
     pass
 
 
-class LastTimeCondition(BaseCondition):
+class LastTimeSignal(BaseSignal):
     def __init__(self, delta):
         if isinstance(delta, dict):
             self.delta = timedelta(**delta)

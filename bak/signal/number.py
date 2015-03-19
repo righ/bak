@@ -1,8 +1,8 @@
 # coding: utf-8
-from .base import BaseCondition
+from .base import BaseSignal
 
 
-class NumberCondition(BaseCondition):
+class NumberCondition(BaseSignal):
     def __init__(self, number):
         self.number = number
 

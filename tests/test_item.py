@@ -4,6 +4,8 @@ import shutil
 from unittest import TestCase
 
 prefix = 'tests/files'
+
+
 def pjoin(path):
     return os.path.join(prefix, path)
 
@@ -52,7 +54,7 @@ class ItemTest(TestCase):
             ItemNotFound,
         )
         with self.assertRaises(ItemNotFound):
-            self._callFUT('nofiletest.txt')
+            self._callFUT('nofiletest.txt', savepath=pjoin('savedir'))
 
     def test_invalid_basename(self):
         from bak.exception import (
@@ -64,7 +66,7 @@ class ItemTest(TestCase):
     def test_save(self):
         path = pjoin('testdir/')
         savepath = pjoin('savedir/')
-        item = self._callFUT(path, savepath)
+        item = self._callFUT(path, savepath, timeunit='microsecond')
         self.assertEqual(len(item.history), 0)
         item.save()
         self.assertEqual(len(item.history), 1)
@@ -83,8 +85,8 @@ class ItemTest(TestCase):
         )
 
         path = pjoin('test.txt')
-        item = self._callFUT(path)
-        with self.assertRaises(Exception):
+        item = self._callFUT(path, savepath=pjoin('savedir'), timeunit='microsecond')
+        with self.assertRaises(HistoryEmpty):
             item.restore()
         item.save()
         item.restore()

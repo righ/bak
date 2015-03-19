@@ -8,7 +8,7 @@ __license__ = 'Apache License 2.0'
 from .item import Item
 
 from .signal.lasttime import LastTimeSignal
-from .signal.number import NumberSignal
+from .signal.fill import FillSignal
 from .signal.schedule import ScheduleSignal
 
 from .behavior.remove import RemoveBehavior

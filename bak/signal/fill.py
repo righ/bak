@@ -2,7 +2,7 @@
 from .base import BaseSignal
 
 
-class NumberCondition(BaseSignal):
+class FillSignal(BaseSignal):
     def __init__(self, number):
         self.number = number
 

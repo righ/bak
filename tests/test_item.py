@@ -43,9 +43,7 @@ class ItemTest(TestCase, CleanMixin):
         self.assertEqual(len(item.history), 3)
 
     def test_restore(self):
-        from bak.exception import (
-            HistoryEmpty,
-        )
+        from bak.exception import HistoryEmpty
 
         path = self.pjoin('test.txt')
         item = self._callFUT(path, savepath=self.pjoin('savedir'), timeunit='microsecond')

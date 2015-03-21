@@ -1,47 +1,10 @@
 # coding: utf-8
-import os
-import shutil
+
 from unittest import TestCase
-
-prefix = 'tests/files'
-
-
-def pjoin(path):
-    return os.path.join(prefix, path)
+from .clean import CleanMixin
 
 
-class ItemTest(TestCase):
-    def _clear(self):
-        for filename in os.listdir(prefix):
-            if filename not in ('test.txt.sample', 'testdir.sample'):
-                self._remove(filename)
-
-    def _remove(self, path):
-        path = pjoin(path)
-        try:
-            if os.path.isdir(path):
-                remove = shutil.rmtree
-            else:
-                remove = os.remove
-            remove(path)
-        except OSError:
-            pass
-
-    def _copy(self, src, dst):
-        self._remove(dst)
-        src = pjoin(src)
-        dst = pjoin(dst)
-        if os.path.isdir(src):
-            copy = shutil.copytree
-        else:
-            copy = shutil.copy
-
-        copy(src, dst)
-
-    def _callFUT(self, *args, **kwargs):
-        from bak.item import Item
-        return Item(*args, **kwargs)
-
+class ItemTest(TestCase, CleanMixin):
     def setUp(self):
         self._copy('test.txt.sample', 'test.txt')
         self._copy('testdir.sample', 'testdir')
@@ -49,23 +12,23 @@ class ItemTest(TestCase):
     def tearDown(self):
         self._clear()
 
+    def _callFUT(self, *args, **kwargs):
+        from bak.item import Item
+        return Item(*args, **kwargs)
+
     def test_target_not_exist(self):
-        from bak.exception import (
-            ItemNotFound,
-        )
+        from bak.exception import ItemNotFound
         with self.assertRaises(ItemNotFound):
-            self._callFUT('nofiletest.txt', savepath=pjoin('savedir'))
+            self._callFUT('nofiletest.txt', savepath=self.pjoin('savedir'))
 
     def test_invalid_basename(self):
-        from bak.exception import (
-            ItemPathInvalid,
-        )
+        from bak.exception import ItemPathInvalid
         with self.assertRaises(ItemPathInvalid):
             self._callFUT('/')
 
     def test_save(self):
-        path = pjoin('testdir/')
-        savepath = pjoin('savedir/')
+        path = self.pjoin('testdir/')
+        savepath = self.pjoin('savedir/')
         item = self._callFUT(path, savepath, timeunit='microsecond')
         self.assertEqual(len(item.history), 0)
         item.save()
@@ -84,8 +47,8 @@ class ItemTest(TestCase):
             HistoryEmpty,
         )
 
-        path = pjoin('test.txt')
-        item = self._callFUT(path, savepath=pjoin('savedir'), timeunit='microsecond')
+        path = self.pjoin('test.txt')
+        item = self._callFUT(path, savepath=self.pjoin('savedir'), timeunit='microsecond')
         with self.assertRaises(HistoryEmpty):
             item.restore()
         item.save()

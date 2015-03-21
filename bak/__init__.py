@@ -9,7 +9,7 @@ from .item import Item
 
 from .signal.lasttime import LastTimeSignal
 from .signal.fill import FillSignal
-from .signal.schedule import ScheduleSignal
+from .signal.cron import CronSignal
 
 from .behavior.remove import RemoveBehavior
 

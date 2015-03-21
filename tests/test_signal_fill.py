@@ -28,10 +28,10 @@ class TestFillSignal(TestCase, CleanMixin):
             item.save(force=True)
 
         f4 = self._getTarget(4)
-        self.assertFalse(f4.evalute(item))
+        self.assertTrue(f4.evalute(item))
 
         f5 = self._getTarget(5)
         self.assertTrue(f5.evalute(item))
 
         f6 = self._getTarget(6)
-        self.assertTrue(f6.evalute(item))
+        self.assertFalse(f6.evalute(item))

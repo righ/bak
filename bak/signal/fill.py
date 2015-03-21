@@ -7,4 +7,4 @@ class FillSignal(BaseSignal):
         self.number = number
 
     def evalute(self, item, **env):
-        return self.number >= len(item.history)
+        return len(item.history) >= self.number

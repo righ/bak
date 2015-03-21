@@ -27,8 +27,8 @@ class TestLastTimeSignal(TestCase, CleanMixin):
         item = self._getItem(path, savepath, timeunit='microsecond')
         item.save(force=True)
 
-        bakname = item.history[0]
-        savetime = datetime.strptime(bakname.split('.')[2], item._timeformat)
+        archive = item.archives[0]
+        savetime = datetime.strptime(archive.split('.')[2], item._timeformat)
         future = savetime + timedelta(hours=1)
 
         ls = self._getTarget(timedelta(hours=1))
@@ -47,8 +47,8 @@ class TestLastTimeSignal(TestCase, CleanMixin):
         item = self._getItem(path, savepath, timeunit='microsecond')
         item.save(force=True)
 
-        bakname = item.history[0]
-        savetime = datetime.strptime(bakname.split('.')[2], item._timeformat)
+        archive = item.archives[0]
+        savetime = datetime.strptime(archive.split('.')[2], item._timeformat)
         future = savetime + timedelta(hours=1)
 
         ls = self._getTarget({'hours': 1})
@@ -67,8 +67,8 @@ class TestLastTimeSignal(TestCase, CleanMixin):
         item = self._getItem(path, savepath, timeunit='microsecond')
         item.save(force=True)
 
-        bakname = item.history[0]
-        savetime = datetime.strptime(bakname.split('.')[2], item._timeformat)
+        archive = item.archives[0]
+        savetime = datetime.strptime(archive.split('.')[2], item._timeformat)
         future = savetime + timedelta(hours=1)
 
         ls = self._getTarget([0, 0, 0, 0, 0, 1])

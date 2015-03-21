@@ -30,7 +30,7 @@ class LastTimeSignal(BaseSignal):
 
     def evalute(self, item, **env):
         try:
-            baktime = item.history[0][len(item._basename)+1:]
+            baktime = item.archives[0][len(item._basename)+1:]
             lasttime = datetime.strptime(baktime.split('.')[0], item._timeformat)
         except IndexError:
             return self.missing

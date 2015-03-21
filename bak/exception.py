@@ -13,7 +13,7 @@ class ItemPathInvalid(BakException):
     pass
 
 
-class HistoryEmpty(BakException):
+class ArchivesEmpty(BakException):
     pass
 
 

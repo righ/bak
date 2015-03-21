@@ -1,5 +1,4 @@
 # coding: utf-8
-
 from unittest import TestCase
 from .clean import CleanMixin
 
@@ -27,4 +26,4 @@ class TestHandler(TestCase, CleanMixin):
         item.on(FillSignal(3), RemoveBehavior(-1))
         for i in range(10):
             item.save(force=True)
-            self.assertTrue(len(item.history) < 4)
+            self.assertTrue(len(item.archives) <= 3)

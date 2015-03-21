@@ -52,20 +52,19 @@ class CronSignal(BaseSignal):
                 else:
                     interval = 1
 
+                interval = int(interval)
+
                 if '-' in time:
                     starttime, endtime = time.split('-')
                 else:
                     starttime, endtime = time, time
 
-                rangeargs = map(int, (starttime, endtime, interval))
-                rangeargs[1] += 1
+                starttime, endtime = int(starttime), int(endtime)+1
 
                 unitnow = getattr(now, unit)
                 unitnow = unitnow() if callable(unitnow) else unitnow
-                if unitnow in range(*rangeargs):
+                if unitnow in range(starttime, endtime, interval):
                     break
-                else:
-                    print unit, unitnow, rangeargs
             else:
                 return False
 

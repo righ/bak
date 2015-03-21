@@ -11,7 +11,7 @@ from .handler import Handler
 from .exception import (
     ItemNotFound,
     ItemPathInvalid,
-    HistoryEmpty,
+    ArchivesEmpty,
     InvalidDatetimeUnit,
 )
 
@@ -20,7 +20,7 @@ BASE_TIMEFORMAT = '%Y%m%d%H%M%S%f'
 
 class Item(object):
     def __repr__(self):
-        return '<{0} ({1})>'.format(self._basename, len(self.history))
+        return '<{0} ({1})>'.format(self._basename, len(self.archives))
 
     def __init__(
         self,
@@ -74,7 +74,7 @@ class Item(object):
         self.handlers = []
 
     @property
-    def history(self):
+    def archives(self):
         return sorted([
             item for item in os.listdir(self._savepath)
             if self._startswith.search(item)
@@ -84,12 +84,12 @@ class Item(object):
         suffix = '.' + datetime.now().strftime(self._timeformat)
         tmppath = os.path.join(self._savepath, self._basename + suffix)
         tmppath = self._archiver.compress(self._path, tmppath, isdir=self._isdir)
-        history = self.history
+        archives = self.archives
 
         try:
             nochange = filecmp.cmp(
-                os.path.join(self._savepath, history[0]),
-                os.path.join(self._savepath, history[1])
+                os.path.join(self._savepath, archives[0]),
+                os.path.join(self._savepath, archives[1])
             )
         except IndexError:
             nochange = False
@@ -103,12 +103,12 @@ class Item(object):
         self.trigger(**self.options)
 
     def restore(self, force=False, refuge_current=True):
-        history = self.history
-        if not history:
-            raise HistoryEmpty(os.listdir(self._savepath))
+        archives = self.archives
+        if not archives:
+            raise ArchivesEmpty(os.listdir(self._savepath))
 
         nochange, curpath = self._temporary()
-        latestpath = history[0]
+        latestpath = archives[0]
 
         if force or not nochange:
             self._remove(self._path)
@@ -138,7 +138,7 @@ class Item(object):
         else:
             indexes = slice(*indexes)
 
-        for archivename in self.history[indexes]:
+        for archivename in self.archives[indexes]:
             archivepath = os.path.join(self._savepath, archivename)
             os.remove(archivepath)
 

@@ -30,27 +30,27 @@ class ItemTest(TestCase, CleanMixin):
         path = self.pjoin('testdir/')
         savepath = self.pjoin('savedir/')
         item = self._callFUT(path, savepath, timeunit='microsecond')
-        self.assertEqual(len(item.history), 0)
+        self.assertEqual(len(item.archives), 0)
         item.save()
-        self.assertEqual(len(item.history), 1)
+        self.assertEqual(len(item.archives), 1)
         item.save(force=True)
-        self.assertEqual(len(item.history), 2)
+        self.assertEqual(len(item.archives), 2)
         item.save()
-        self.assertEqual(len(item.history), 2)
+        self.assertEqual(len(item.archives), 2)
         with open(path+'/a.txt', 'wb') as f:
-            f.write('changed')
+            f.write(u'changed'.encode('utf-8'))
         item.save()
-        self.assertEqual(len(item.history), 3)
+        self.assertEqual(len(item.archives), 3)
 
     def test_restore(self):
-        from bak.exception import HistoryEmpty
+        from bak.exception import ArchivesEmpty
 
         path = self.pjoin('test.txt')
         item = self._callFUT(path, savepath=self.pjoin('savedir'), timeunit='microsecond')
-        with self.assertRaises(HistoryEmpty):
+        with self.assertRaises(ArchivesEmpty):
             item.restore()
         item.save()
         item.restore()
-        self.assertEqual(len(item.history), 1)
+        self.assertEqual(len(item.archives), 1)
         item.restore(force=True)
-        self.assertEqual(len(item.history), 0)
+        self.assertEqual(len(item.archives), 0)
